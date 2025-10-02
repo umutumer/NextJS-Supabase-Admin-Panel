@@ -4,29 +4,81 @@ import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
 import { Label } from "../ui/label";
 import { Product } from "@/interfaces/Product";
-import { createProduct, updateProduct } from '@/lib/supabase/Products';
+import { createProduct, updateProduct } from "@/lib/supabase/Products";
+import { X } from "lucide-react";
 interface ProductFormProps {
-  formData: Omit<Product, "created_at">
-  setFormData: React.Dispatch<React.SetStateAction<Omit<Product, "created_at">>>
+  formData: Omit<Product, "created_at">;
+  setFormData: React.Dispatch<
+    React.SetStateAction<Omit<Product, "created_at">>
+  >;
+  setModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  editingId?: number | undefined;
+  setEditingId: React.Dispatch<React.SetStateAction<number | undefined>>;
 }
 
-const ProductForm: React.FC<ProductFormProps> = ({ formData, setFormData }) => {
-    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault();
-        if (formData.id) {
-            updateProduct(formData.id, {
-                product_name: formData.product_name,
-                product_description: formData.product_description,
-                product_price: formData.product_price
-            })
-        } else {
-            createProduct(formData)
-        }
-    };
+const ProductForm: React.FC<ProductFormProps> = ({
+  formData,
+  setFormData,
+  setModalVisible,
+  editingId,
+  setEditingId,
+}) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (editingId) {
+      updateProduct(editingId, {
+        product_name: formData.product_name,
+        product_description: formData.product_description,
+        product_price: formData.product_price,
+      }).then(() => {
+        setModalVisible(false);
+        setFormData({
+          product_name: "",
+          product_description: "",
+          product_price: 0,
+          created_by: formData.created_by,
+        });
+      });
+    } else {
+      createProduct(formData).then(() => {
+        setModalVisible(false);
+        setFormData({
+          product_name: "",
+          product_description: "",
+          product_price: 0,
+          created_by: formData.created_by,
+        });
+      });
+    }
+  };
+  const cancelSubmit = () => {
+    if (editingId) {
+      setEditingId(undefined);
+    }
+    setFormData({
+      product_name: "",
+      product_description: "",
+      product_price: 0,
+      created_by: formData.created_by,
+    });
+    setModalVisible(false);
+  };
   return (
     <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <form className="bg-white p-6 rounded-lg shadow-l w-[500px] flex flex-col gap-4" onSubmit={handleSubmit}>
-        <h2 className="text-2xl font-bold">{formData.id ? "Edit Product" : "Add Product"}</h2>
+      <form
+        className="bg-white p-6 rounded-lg shadow-l w-[500px] flex flex-col gap-4 relative"
+        onSubmit={handleSubmit}
+      >
+        <Button
+          type="button"
+          className="absolute top-2 right-2 rounded-full w-8 h-8"
+          onClick={cancelSubmit}
+        >
+          <X />
+        </Button>
+        <h2 className="text-2xl font-bold">
+          {editingId ? "Edit Product" : "Add Product"}
+        </h2>
         <Label htmlFor="product_name">Product Name</Label>
         <Input
           type="text"
@@ -57,7 +109,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ formData, setFormData }) => {
             setFormData({ ...formData, product_price: Number(e.target.value) })
           }
         />
-        <Button type="submit">{formData.id ? "Update" : "Add"} Product</Button>
+        <Button type="submit">{editingId ? "Update" : "Add"} Product</Button>
       </form>
     </div>
   );
