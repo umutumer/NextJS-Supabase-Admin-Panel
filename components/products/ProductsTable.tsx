@@ -3,30 +3,14 @@
 import * as React from "react";
 import {
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
   useReactTable,
-  VisibilityState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ChevronDown, Edit, MoreHorizontal } from "lucide-react";
+import { Edit,  Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -42,8 +26,10 @@ import { getProducts } from "@/lib/supabase/Products";
 
 export function ProductsTable({
   handleEditBtn,
+  handleDeleteBtn
 }: {
   handleEditBtn: (product: Product) => void;
+  handleDeleteBtn: (product: Product) => void;
 }) {
   const columns: ColumnDef<Product>[] = [
     {
@@ -84,6 +70,7 @@ export function ProductsTable({
       cell: ({ row }) => {
         const product = row.original;
         return (
+          <>
           <Button
             variant={"ghost"}
             onClick={() => {
@@ -92,6 +79,15 @@ export function ProductsTable({
           >
             <Edit />
           </Button>
+          <Button
+            variant={"ghost"}
+            onClick={() => {
+              handleDeleteBtn(product);
+            }}
+          >
+            <Trash2 />
+          </Button>
+          </>
         );
       },
     },

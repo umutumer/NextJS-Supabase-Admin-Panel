@@ -4,6 +4,7 @@ import { ProductsTable } from "./ProductsTable";
 import ProductForm from "./ProductForm";
 import { Product } from "@/interfaces/Product";
 import { Button } from "../ui/button";
+import DeleteProductModal from "./DeleteProductModal";
 
 const ProductsContent = ({ email }: { email: string }) => {
   const [formData, setFormData] = useState<Omit<Product, "id" | "created_at">>({
@@ -14,6 +15,8 @@ const ProductsContent = ({ email }: { email: string }) => {
   });
   const [modalVisible, setModalVisible] = useState<boolean>(false);
   const [editingId, setEditingId] = useState<number | undefined>(undefined);
+  const [deletingId, setDeletingId] = useState<number | undefined>(undefined);
+  const [deleteModalVisible, setDeleteModalVisible] = useState<boolean>(false);
   const handleEditBtn = (product: Product) => {
     setEditingId(product.id);
     setFormData({
@@ -24,6 +27,10 @@ const ProductsContent = ({ email }: { email: string }) => {
     });
     setModalVisible(true);
   };
+  const handleDeleteBtn = (product: Product) =>{
+    setDeleteModalVisible(true);
+    setDeletingId(product.id);
+  }
   return (
     <div className="px-24 py-12 w-full">
       <div className="w-full flex items-center justify-center mb-12 bg-primary text-white py-16 rounded-lg">
@@ -32,7 +39,7 @@ const ProductsContent = ({ email }: { email: string }) => {
       <div className="w-full flex justify-end mb-4">
         <Button onClick={() => setModalVisible(true)}>Add Product</Button>
       </div>
-      <ProductsTable handleEditBtn={handleEditBtn} />
+      <ProductsTable handleEditBtn={handleEditBtn} handleDeleteBtn={handleDeleteBtn} />
       {modalVisible && (
         <ProductForm
           formData={formData}
@@ -41,6 +48,9 @@ const ProductsContent = ({ email }: { email: string }) => {
           editingId={editingId}
           setEditingId={setEditingId}
         />
+      )}
+      {deleteModalVisible && (
+        <DeleteProductModal setDeletingId={setDeletingId} deletingId={deletingId} setDeleteModalVisible={setDeleteModalVisible} />
       )}
     </div>
   );
